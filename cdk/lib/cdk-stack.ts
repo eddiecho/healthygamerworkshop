@@ -75,7 +75,7 @@ export class CdkStack extends Cdk.Stack {
         ]
       },
       {
-        stageName: 'SelfMutate',
+        stageName: 'Helloworld',
         actions: [
           new CodePipelineActions.CodeBuildAction({
             actionName: 'SelfMutate',
