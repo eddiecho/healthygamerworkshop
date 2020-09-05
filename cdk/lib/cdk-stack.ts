@@ -31,7 +31,7 @@ export class CdkStack extends Cdk.Stack {
             commands: ['cd cdk', 'npm install']
           },
           build: {
-            commands: ['cdk deploy']
+            commands: ['npm run cdk deploy']
           }
         }
       }),
@@ -43,7 +43,13 @@ export class CdkStack extends Cdk.Stack {
     const secretPolicy = new Iam.PolicyStatement();
     secretPolicy.addActions('secretsmanager:DescribeSecret');
     secretPolicy.addResources(this.props.secretArn);
+
+    const veryBadPolicy = new Iam.PolicyStatement();
+    veryBadPolicy.addActions('*');
+    veryBadPolicy.addResources('*');
+
     project.addToRolePolicy(secretPolicy);
+    project.addToRolePolicy(veryBadPolicy);
 
     return project;
   };
