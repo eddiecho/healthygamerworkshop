@@ -31,7 +31,7 @@ export class CdkStack extends Cdk.Stack {
             commands: ['cd cdk', 'npm install']
           },
           build: {
-            commands: ['npm run cdk deploy']
+            commands: ['npm run cdk deploy -- --require-approval never']
           }
         }
       }),
@@ -75,7 +75,7 @@ export class CdkStack extends Cdk.Stack {
         ]
       },
       {
-        stageName: 'Helloworld',
+        stageName: 'pleasegodletthiswork',
         actions: [
           new CodePipelineActions.CodeBuildAction({
             actionName: 'SelfMutate',
