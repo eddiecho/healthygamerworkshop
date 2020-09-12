@@ -22,6 +22,10 @@ export class CdkStack extends Cdk.Stack {
     });
   }
 
+  // CodeBuild is billed per usage, so the less usage you have the better
+  // We can remove the time it takes for CloudFormation to deploy from CodeBuild
+  // Just render the template, then pass it to CloudFormation directly
+  // CloudFormation is free to use
   private renderSelfMutateProject = (): CodeBuild.PipelineProject => {
     const project = new CodeBuild.PipelineProject(this, 'SelfMutateProject', {
       buildSpec: CodeBuild.BuildSpec.fromObject({
@@ -31,8 +35,12 @@ export class CdkStack extends Cdk.Stack {
             commands: ['cd cdk', 'npm install']
           },
           build: {
-            commands: ['npm run cdk deploy -- --require-approval never']
+            commands: [`npm run build ${this.stackName}`],
           }
+        },
+        artifacts: {
+          'base-directory': 'cdk/cdk.out',
+          files: [`${this.stackName}.template.json`],
         }
       }),
       environment: {
@@ -43,13 +51,7 @@ export class CdkStack extends Cdk.Stack {
     const secretPolicy = new Iam.PolicyStatement();
     secretPolicy.addActions('secretsmanager:DescribeSecret');
     secretPolicy.addResources(this.props.secretArn);
-
-    const veryBadPolicy = new Iam.PolicyStatement();
-    veryBadPolicy.addActions('*');
-    veryBadPolicy.addResources('*');
-
     project.addToRolePolicy(secretPolicy);
-    project.addToRolePolicy(veryBadPolicy);
 
     return project;
   };
@@ -75,13 +77,23 @@ export class CdkStack extends Cdk.Stack {
         ]
       },
       {
-        stageName: 'pleasegodletthiswork',
+        stageName: 'SelfMutate',
         actions: [
           new CodePipelineActions.CodeBuildAction({
-            actionName: 'SelfMutate',
+            actionName: 'SelfMutateRender',
             input: sourceOutput,
             outputs: [selfMutateOutput],
-            project: this.renderSelfMutateProject()
+            project: this.renderSelfMutateProject(),
+            runOrder: 1
+          }),
+          new CodePipelineActions.CloudFormationCreateUpdateStackAction({
+            actionName: 'SelfMutateDeploy',
+            // CloudFormation needs permissions to create and delete arbitrary resources
+            // Enumerating them manually is a pain.... Even inside Amazon we give CFN admin permissions
+            adminPermissions: true,
+            stackName: this.stackName,
+            templatePath: selfMutateOutput.atPath(`${this.stackName}.template.json`),
+            runOrder: 2
           })
         ]
       }
