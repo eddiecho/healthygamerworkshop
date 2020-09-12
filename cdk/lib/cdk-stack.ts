@@ -35,7 +35,7 @@ export class CdkStack extends Cdk.Stack {
             commands: ['cd cdk', 'npm install'],
           },
           build: {
-            commands: [`npm run build ${this.stackName}`],
+            commands: [`npm run cdk synth ${this.stackName}`],
           },
         },
         artifacts: {
