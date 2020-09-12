@@ -18,7 +18,7 @@ export class CdkStack extends Cdk.Stack {
 
     new CodePipeline.Pipeline(this, 'HealthyGamerWorkshopPipeline', {
       restartExecutionOnUpdate: true,
-      stages: this.renderPipelineStages()
+      stages: this.renderPipelineStages(),
     });
   }
 
@@ -32,20 +32,20 @@ export class CdkStack extends Cdk.Stack {
         version: '0.2',
         phases: {
           install: {
-            commands: ['cd cdk', 'npm install']
+            commands: ['cd cdk', 'npm install'],
           },
           build: {
             commands: [`npm run build ${this.stackName}`],
-          }
+          },
         },
         artifacts: {
           'base-directory': 'cdk/cdk.out',
           files: [`${this.stackName}.template.json`],
-        }
+        },
       }),
       environment: {
-        buildImage: CodeBuild.LinuxBuildImage.STANDARD_4_0
-      }
+        buildImage: CodeBuild.LinuxBuildImage.STANDARD_4_0,
+      },
     });
 
     const secretPolicy = new Iam.PolicyStatement();
@@ -58,7 +58,11 @@ export class CdkStack extends Cdk.Stack {
 
   private renderPipelineStages = (): CodePipeline.StageProps[] => {
     const sourceOutput = new CodePipeline.Artifact();
-    const sourceAuth = SecretsManager.Secret.fromSecretArn(this, 'GithubSecret', this.props.secretArn).secretValueFromJson('OAuth');
+    const sourceAuth = SecretsManager.Secret.fromSecretArn(
+      this,
+      'GithubSecret',
+      this.props.secretArn
+    ).secretValueFromJson('OAuth');
 
     const selfMutateOutput = new CodePipeline.Artifact();
 
@@ -73,8 +77,8 @@ export class CdkStack extends Cdk.Stack {
             owner: 'eddiecho',
             repo: 'healthygamerworkshop',
             branch: 'master',
-          })
-        ]
+          }),
+        ],
       },
       {
         stageName: 'SelfMutate',
@@ -84,7 +88,7 @@ export class CdkStack extends Cdk.Stack {
             input: sourceOutput,
             outputs: [selfMutateOutput],
             project: this.renderSelfMutateProject(),
-            runOrder: 1
+            runOrder: 1,
           }),
           new CodePipelineActions.CloudFormationCreateUpdateStackAction({
             actionName: 'SelfMutateDeploy',
@@ -93,11 +97,10 @@ export class CdkStack extends Cdk.Stack {
             adminPermissions: true,
             stackName: this.stackName,
             templatePath: selfMutateOutput.atPath(`${this.stackName}.template.json`),
-            runOrder: 2
-          })
-        ]
-      }
-    ]
-  }
-
+            runOrder: 2,
+          }),
+        ],
+      },
+    ];
+  };
 }
