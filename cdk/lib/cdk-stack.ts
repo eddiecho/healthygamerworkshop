@@ -40,7 +40,7 @@ export class CdkStack extends Cdk.Stack {
         },
         artifacts: {
           'base-directory': 'cdk/cdk.out',
-          files: [`${this.stackName}.template.json`],
+          files: ['**/*']
         },
       }),
       environment: {
