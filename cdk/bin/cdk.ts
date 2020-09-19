@@ -4,6 +4,7 @@ import * as cdk from '@aws-cdk/core';
 import * as SecretsManager from 'aws-sdk/clients/secretsmanager';
 
 import { CdkStack } from '../lib/cdk-stack';
+import { BackendStack } from '../lib/backend-stack';
 
 async function describeSecret(secretId: string): Promise<SecretsManager.DescribeSecretResponse> {
   const secrets = new SecretsManager();
@@ -19,4 +20,5 @@ async function describeSecret(secretId: string): Promise<SecretsManager.Describe
 
   const app = new cdk.App();
   new CdkStack(app, 'CdkStack', { secretArn: githubSecret.ARN as string });
+  new BackendStack(app, 'HealthyGamerWorkshopBackendStack');
 })();

@@ -32,10 +32,10 @@ export class CdkStack extends Cdk.Stack {
         version: '0.2',
         phases: {
           install: {
-            commands: ['cd cdk', 'npm install'],
+            commands: ['chmod +x cdk/bin/*'],
           },
           build: {
-            commands: [`npm run cdk synth ${this.stackName}`],
+            commands: [`./cdk/bin/build_code.sh`],
           },
         },
         artifacts: {
@@ -52,6 +52,27 @@ export class CdkStack extends Cdk.Stack {
     secretPolicy.addActions('secretsmanager:DescribeSecret');
     secretPolicy.addResources(this.props.secretArn);
     project.addToRolePolicy(secretPolicy);
+
+    return project;
+  };
+
+  private renderDeployBackend = (): CodeBuild.PipelineProject => {
+    const project = new CodeBuild.PipelineProject(this, 'DeployBackendProject', {
+      buildSpec: CodeBuild.BuildSpec.fromObject({
+        version: '0.2',
+        phases: {
+          build: [`cdk/bin/deploy_backend.sh ${this.stackName}`],
+        },
+      }),
+      environment: {
+        buildImage: CodeBuild.LinuxBuildImage.STANDARD_4_0,
+      },
+    });
+
+    const cloudformationPolicy = new Iam.PolicyStatement();
+    cloudformationPolicy.addActions('*');
+    cloudformationPolicy.addResources('*');
+    project.addToRolePolicy(cloudformationPolicy);
 
     return project;
   };
@@ -98,6 +119,18 @@ export class CdkStack extends Cdk.Stack {
             stackName: this.stackName,
             templatePath: selfMutateOutput.atPath(`${this.stackName}.template.json`),
             runOrder: 2,
+          }),
+        ],
+      },
+      // Remember - NO TESTING STAGE
+      // If you have one, add it before here!!!
+      {
+        stageName: 'DeployBackend',
+        actions: [
+          new CodePipelineActions.CodeBuildAction({
+            actionName: 'DeployBackend',
+            input: selfMutateOutput,
+            project: this.renderDeployBackend(),
           }),
         ],
       },
