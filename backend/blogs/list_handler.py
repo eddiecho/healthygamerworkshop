@@ -9,7 +9,7 @@ def list_handler(event):
 
     ddb = boto3.client('dynamodb')
     kwargs = {
-        'TableName': os.environ['TableName'],
+        'TableName': os.environ['TABLE_NAME'],
         'Limit': 4
     }
     if 'NextToken' in event:
