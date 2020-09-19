@@ -117,7 +117,7 @@ export class CdkStack extends Cdk.Stack {
             // Enumerating them manually is a pain.... Even inside Amazon we give CFN admin permissions
             adminPermissions: true,
             stackName: this.stackName,
-            templatePath: selfMutateOutput.atPath(`${this.stackName}.template.json`),
+            templatePath: selfMutateOutput.atPath(`cdk.out/${this.stackName}.template.json`),
             runOrder: 2,
           }),
         ],
