@@ -7,6 +7,7 @@ import * as Cdk from '@aws-cdk/core';
 
 interface CdkStackProps extends Cdk.StackProps {
   secretArn: string;
+  backendStackName: string;
 }
 
 export class CdkStack extends Cdk.Stack {
@@ -62,7 +63,7 @@ export class CdkStack extends Cdk.Stack {
         version: '0.2',
         phases: {
           build: {
-            commands: [`./bin/deploy_backend.sh ${this.stackName}`],
+            commands: [`./bin/deploy_backend.sh ${this.props.backendStackName}`],
           },
         },
       }),

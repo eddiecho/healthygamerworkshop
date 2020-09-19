@@ -19,7 +19,11 @@ async function describeSecret(secretId: string): Promise<SecretsManager.Describe
   const githubSecret = await describeSecret('GithubPersonalAccessToken');
 
   const app = new cdk.App();
-  new CdkStack(app, 'CdkStack', { secretArn: githubSecret.ARN as string });
-  new BackendStack(app, 'HealthyGamerWorkshopBackendStack');
+  const backendStack = new BackendStack(app, 'HealthyGamerWorkshopBackendStack');
+
+  new CdkStack(app, 'CdkStack', {
+    secretArn: githubSecret.ARN as string,
+    backendStackName: backendStack.stackName,
+  });
   app.synth();
 })();
