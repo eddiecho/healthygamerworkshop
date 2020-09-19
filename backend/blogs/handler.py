@@ -1,7 +1,7 @@
 import json
 import logging
 
-from .list_handler import list_handler
+from lambdas.list_handler import list_handler
 
 def __finalize_response(body, status_code):
     return {
