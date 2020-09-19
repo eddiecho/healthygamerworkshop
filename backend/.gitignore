@@ -1,1 +1,2 @@
-app/layer
+app/layer/*
+!app/layer/.gitkeep
