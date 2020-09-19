@@ -61,7 +61,9 @@ export class CdkStack extends Cdk.Stack {
       buildSpec: CodeBuild.BuildSpec.fromObject({
         version: '0.2',
         phases: {
-          build: [`cdk/bin/deploy_backend.sh ${this.stackName}`],
+          build: {
+            commands: [`./bin/deploy_backend.sh ${this.stackName}`],
+          },
         },
       }),
       environment: {
