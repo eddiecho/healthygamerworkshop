@@ -54,6 +54,11 @@ export class CdkStack extends Cdk.Stack {
     secretPolicy.addResources(this.props.secretArn);
     project.addToRolePolicy(secretPolicy);
 
+    const networkPolicy = new Iam.PolicyStatement();
+    networkPolicy.addActions('route53:ListHostedZones');
+    networkPolicy.addResources('*');
+    project.addToRolePolicy(networkPolicy);
+
     return project;
   };
 
