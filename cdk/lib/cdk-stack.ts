@@ -35,18 +35,18 @@ export class CdkStack extends Cdk.Stack {
             commands: ['chmod +x frontend/bin/*'],
           },
           build: {
-            commands: ['./frontend/bin/compile_frontend.sh']
-          }
+            commands: ['./frontend/bin/compile_frontend.sh'],
+          },
         },
         artifacts: {
           'base-directory': 'frontend/build/',
-          files: ['**/*']
-        }
+          files: ['**/*'],
+        },
       }),
       environment: {
         buildImage: CodeBuild.LinuxBuildImage.STANDARD_4_0,
-      }
-    })
+      },
+    });
   };
 
   // CodeBuild is billed per usage, so the less usage you have the better
@@ -143,9 +143,9 @@ export class CdkStack extends Cdk.Stack {
             actionName: 'CompileFrontend',
             input: sourceOutput,
             outputs: [staticAssetsOutput],
-            project: this.renderCompileFrontendProject()
+            project: this.renderCompileFrontendProject(),
           }),
-        ]
+        ],
       },
       {
         stageName: 'SelfMutate',
@@ -195,9 +195,9 @@ export class CdkStack extends Cdk.Stack {
             bucket: this.props.frontendStaticAssetsBucket,
             input: staticAssetsOutput,
             runOrder: 2,
-          })
-        ]
-      }
+          }),
+        ],
+      },
     ];
   };
 }

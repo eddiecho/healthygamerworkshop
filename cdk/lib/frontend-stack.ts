@@ -12,7 +12,7 @@ interface FrontendStackProps extends Cdk.StackProps {
 }
 
 export class FrontendStack extends Cdk.Stack {
-  public staticAssetsBucket: S3.IBucket;
+  private staticAssetsBucket: S3.IBucket;
 
   constructor(app: Cdk.App, name: string, props: FrontendStackProps) {
     super(app, name, props);
@@ -24,7 +24,7 @@ export class FrontendStack extends Cdk.Stack {
 
     const originAccessIdentity = new Cloudfront.OriginAccessIdentity(this, 'SiteOriginAccessIdentity');
     const siteBucket = new S3.Bucket(this, 'SiteBucket', {
-      websiteIndexDocument: 'index.html'
+      websiteIndexDocument: 'index.html',
     });
     siteBucket.grantRead(originAccessIdentity);
     this.staticAssetsBucket = siteBucket;
@@ -32,7 +32,7 @@ export class FrontendStack extends Cdk.Stack {
     const certificate = new Acm.Certificate(this, 'SiteCertificate', {
       domainName: `*.${props.domainName}`,
       validationMethod: Acm.ValidationMethod.DNS,
-      subjectAlternativeNames: [`www.${props.domainName}`, props.domainName]
+      subjectAlternativeNames: [`www.${props.domainName}`, props.domainName],
     });
 
     const distribution = new Cloudfront.CloudFrontWebDistribution(this, 'SiteDistribution', {
@@ -46,12 +46,12 @@ export class FrontendStack extends Cdk.Stack {
             {
               isDefaultBehavior: true,
               defaultTtl: Cdk.Duration.minutes(15),
-            }
-          ]
-        }
+            },
+          ],
+        },
       ],
       viewerCertificate: Cloudfront.ViewerCertificate.fromAcmCertificate(certificate, {
-        aliases: [`www.${props.domainName}`, props.domainName]
+        aliases: [`www.${props.domainName}`, props.domainName],
       }),
       priceClass: Cloudfront.PriceClass.PRICE_CLASS_100,
     });
@@ -64,7 +64,11 @@ export class FrontendStack extends Cdk.Stack {
     const apexRecord = new Route53.ARecord(this, 'SiteApexRecord', {
       target: Route53.RecordTarget.fromAlias(new Route53Targets.CloudFrontTarget(distribution)),
       zone: hostedZone,
-      recordName: `www.${props.domainName}`
+      recordName: `www.${props.domainName}`,
     });
   }
+
+  public getStaticAssetsBucket = (): S3.IBucket => {
+    return this.staticAssetsBucket;
+  };
 }

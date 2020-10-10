@@ -32,6 +32,7 @@ async function listHostedZones(): Promise<Route53.ListHostedZonesResponse> {
   }
 
   const app = new cdk.App();
+
   const frontendStack = new FrontendStack(app, 'HealthyGamerWorkshopFrontendStack', {
     hostedZoneId: filtered[0].Id,
     hostedZoneName: filtered[0].Name,
@@ -44,7 +45,7 @@ async function listHostedZones(): Promise<Route53.ListHostedZonesResponse> {
     secretArn: githubSecret.ARN as string,
     backendStackName: backendStack.stackName,
     frontendStackName: frontendStack.stackName,
-    frontendStaticAssetsBucket: frontendStack.staticAssetsBucket,
+    frontendStaticAssetsBucket: frontendStack.getStaticAssetsBucket(),
   });
   app.synth();
 })();
