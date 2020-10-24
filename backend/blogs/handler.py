@@ -8,7 +8,9 @@ def __finalize_response(body, status_code):
         'statusCode': status_code,
         'headers': {
             'Access-Control-Allow-Origin': '*',
-            'Access-Control-Allow-Credentials': True
+            'Access-Control-Allow-Credentials': True,
+            'Access-Control-Allow-Methods': '*',
+            'Access-Control-Allow-Headers': 'Content-Type,X-Amz-Date,Authorization,X-Api-Key'
         },
         'body': json.dumps(body)
     }
