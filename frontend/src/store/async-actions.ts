@@ -13,7 +13,7 @@ function listBlogs(nextToken?: string) {
 
   return asyncActionCreator(
     BlogActions.listBlogs,
-    fetch('https://api.healthygamerworkshop.com/prod/blog/list', {
+    fetch('https://api.healthygamerworkshop.com/blog/list', {
         method: 'POST',
         body: JSON.stringify(request),
         mode: 'cors',
