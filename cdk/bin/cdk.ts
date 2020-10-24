@@ -30,18 +30,21 @@ async function listHostedZones(): Promise<Route53.ListHostedZonesResponse> {
   if (filtered.length !== 1) {
     throw 'No hosted zone found';
   }
+  const hostedZone = filtered[0];
 
   const app = new cdk.App();
 
   const domainName = 'healthygamerworkshop.com';
   const frontendStack = new FrontendStack(app, 'HealthyGamerWorkshopFrontendStack', {
-    hostedZoneId: filtered[0].Id,
-    hostedZoneName: filtered[0].Name,
+    hostedZoneId: hostedZone.Id,
+    hostedZoneName: hostedZone.Name,
     domainName: domainName,
   });
 
   const backendStack = new BackendStack(app, 'HealthyGamerWorkshopBackendStack', {
     domainName: domainName,
+    hostedZoneId: hostedZone.Id,
+    hostedZoneName: hostedZone.Name,
   });
 
   new CdkStack(app, 'CdkStack', {

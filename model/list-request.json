@@ -5,6 +5,7 @@
     "NextToken": {
       "type": "string"
     }
-  }
+  },
+  "additionalProperties": false
 }
 

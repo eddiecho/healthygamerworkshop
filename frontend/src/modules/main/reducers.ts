@@ -6,7 +6,7 @@ export interface MainReducer {
   count: number;
 }
 
-export const mainReducer = (state: MainReducer = {} as MainReducer, action: AnyAction) => {
+export const mainReducer = (state: MainReducer = {} as MainReducer, action: AnyAction): MainReducer => {
   switch(action.type) {
     case MainActions.incrementCount:
       return { ...state, count: action.payload };

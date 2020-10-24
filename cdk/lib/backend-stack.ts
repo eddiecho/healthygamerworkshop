@@ -3,12 +3,16 @@ import * as ApiGateway from '@aws-cdk/aws-apigateway';
 import * as Dynamo from '@aws-cdk/aws-dynamodb';
 import * as Iam from '@aws-cdk/aws-iam';
 import * as Lambda from '@aws-cdk/aws-lambda';
+import * as Route53 from '@aws-cdk/aws-route53';
+import * as Route53Targets from '@aws-cdk/aws-route53-targets';
 import * as Cdk from '@aws-cdk/core';
 import * as fs from 'fs';
 import * as path from 'path';
 
 interface BackendStackProps extends Cdk.StackProps {
   domainName: string;
+  hostedZoneId: string;
+  hostedZoneName: string;
 }
 
 export class BackendStack extends Cdk.Stack {
@@ -48,6 +52,11 @@ export class BackendStack extends Cdk.Stack {
       validationMethod: Acm.ValidationMethod.DNS,
     });
 
+    const hostedZone = Route53.HostedZone.fromHostedZoneAttributes(this, 'ApiHostedZone', {
+      hostedZoneId: this.props.hostedZoneId,
+      zoneName: this.props.hostedZoneName,
+    });
+
     this.api = new ApiGateway.RestApi(this, 'HealthyGamerWorkshopApi', {
       domainName: {
         domainName: `api.${this.props.domainName}`,
@@ -58,6 +67,11 @@ export class BackendStack extends Cdk.Stack {
         allowMethods: ApiGateway.Cors.ALL_METHODS,
         allowCredentials: true,
       },
+    });
+
+    new Route53.ARecord(this, 'ApiCustomNameRecord', {
+      target: Route53.RecordTarget.fromAlias(new Route53Targets.ApiGateway(this.api)),
+      zone: hostedZone,
     });
   };
 

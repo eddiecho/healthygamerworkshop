@@ -3,6 +3,8 @@ import { connect } from 'react-redux';
 import { Dispatch, bindActionCreators } from 'redux';
 
 import { Store } from 'store';
+import { AsyncThunkDispatch, bindAsyncActionCreator } from 'store/async-helper';
+import BlogActions from 'store/async-actions';
 import * as Actions from './actions';
 
 interface StateProps {
@@ -11,6 +13,7 @@ interface StateProps {
 
 interface DispatchProps {
   propAction: typeof Actions.propsActions;
+  listBlogs: (nextToken?: string) => Promise<any>;
 }
 
 interface OwnProps {}
@@ -29,9 +32,15 @@ class Main extends React.Component<Props, State> {
     }
   }
 
-  componentDidMount() {
+  async componentDidMount() {
     if (this.props.propAction) {
       this.props.propAction(42);
+    }
+
+    try {
+      this.props.listBlogs();
+    } catch (e) {
+      console.log('fail');
     }
   }
 
@@ -62,8 +71,11 @@ const mapStateToProps = (store: Store): StateProps => {
   }
 }
 
-const mapDispatchToProps = (dispatch: Dispatch): DispatchProps => {
-  return bindActionCreators({ propAction: Actions.propsActions }, dispatch);
+const mapDispatchToProps = (dispatch: AsyncThunkDispatch): DispatchProps => {
+  return {
+    ...bindActionCreators({ propAction: Actions.propsActions }, dispatch),
+    listBlogs: bindAsyncActionCreator(BlogActions.listBlogs, dispatch),
+  }
 }
 
 export default connect<StateProps, DispatchProps, OwnProps, Store>(mapStateToProps, mapDispatchToProps)(Main);
