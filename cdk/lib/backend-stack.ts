@@ -3,6 +3,7 @@ import * as Dynamo from '@aws-cdk/aws-dynamodb';
 import * as Iam from '@aws-cdk/aws-iam';
 import * as Lambda from '@aws-cdk/aws-lambda';
 import * as Cdk from '@aws-cdk/core';
+import * as fs from 'fs';
 import * as path from 'path';
 
 export class BackendStack extends Cdk.Stack {
@@ -50,6 +51,11 @@ export class BackendStack extends Cdk.Stack {
     return Lambda.Code.fromAsset(path.join(__dirname, '../../backend/blogs'));
   };
 
+  private loadSchema = (filepath: string): ApiGateway.JsonSchema => {
+    const buffer = fs.readFileSync(path.join(__dirname, '../../model', filepath));
+    return JSON.parse(buffer.toString()) as ApiGateway.JsonSchema;
+  }
+
   private renderListMethod = (resource: ApiGateway.Resource): void => {
     const listFunction = new Lambda.Function(this, 'ListFunction', {
       runtime: Lambda.Runtime.PYTHON_3_8,
@@ -73,10 +79,35 @@ export class BackendStack extends Cdk.Stack {
       sourceArn: this.api.arnForExecuteApi(),
     });
 
+    const requestModel = this.api.addModel('ListRequest', {
+      contentType: 'application/json',
+      modelName: 'ListRequest',
+      schema:this.loadSchema('list-request.json'),
+    });
+
+    const responseModel = this.api.addModel('ListResponse', {
+      contentType: 'application/json',
+      modelName: 'ListResponse',
+      schema:this.loadSchema('list-response.json'),
+    });
+
     const integration = new ApiGateway.LambdaIntegration(listFunction, {
       allowTestInvoke: true,
       proxy: true,
     });
-    resource.addMethod('POST', integration);
+    resource.addMethod('POST', integration, {
+      operationName: 'ListBlogs',
+      requestModels: {
+        'application/json': requestModel,
+      },
+      methodResponses: [
+        {
+          statusCode: '200',
+          responseModels: {
+            'application/json': responseModel
+          },
+        },
+      ]
+    });
   };
 }

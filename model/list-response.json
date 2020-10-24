@@ -1,0 +1,47 @@
+{
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "type": "object",
+    "defintions": {
+        "BlogSummary": {
+          "type": "object",
+          "properties": {
+            "Id": {
+              "type": "string"
+            },
+            "Title": {
+              "type": "string"
+            },
+            "Author": {
+              "type": "string"
+            },
+            "Summary": {
+              "type": "string"
+            },
+            "CreationTime": {
+              "type": "integer"
+            }
+          },
+          "required": [
+            "Id",
+            "Title",
+            "Author",
+            "Summary",
+            "CreationTime"
+          ]
+        }
+      },
+      "properties": {
+        "NextToken": {
+          "type": "string"
+        },
+        "Blogs": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/BlogSummary" }
+        }
+      },
+      "required": [
+        "Blogs"
+      ],
+      "additionalProperties": false
+}
+

@@ -5,8 +5,7 @@
     "cdk": "bin/cdk.js"
   },
   "scripts": {
-    "build": "tsc",
-    "watch": "tsc -w",
+    "build": "cdk synth",
     "test": "jest",
     "cdk": "cdk"
   },
