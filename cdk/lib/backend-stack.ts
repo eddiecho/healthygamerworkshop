@@ -49,10 +49,13 @@ export class BackendStack extends Cdk.Stack {
     });
 
     this.api = new ApiGateway.RestApi(this, 'HealthyGamerWorkshopApi', {
+      // CDK generation is kind of dumb, remove then readd 
+      /* 
       domainName: {
         domainName: `api.${this.props.domainName}`,
         certificate: certificate,
       },
+      */
       defaultCorsPreflightOptions: {
         allowOrigins: [ ApiGateway.Cors.ALL_ORIGINS ],
         allowCredentials: true,
