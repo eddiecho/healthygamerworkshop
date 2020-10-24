@@ -1,3 +1,4 @@
+import * as Acm from '@aws-cdk/aws-certificatemanager';
 import * as ApiGateway from '@aws-cdk/aws-apigateway';
 import * as Dynamo from '@aws-cdk/aws-dynamodb';
 import * as Iam from '@aws-cdk/aws-iam';
@@ -6,13 +7,20 @@ import * as Cdk from '@aws-cdk/core';
 import * as fs from 'fs';
 import * as path from 'path';
 
+interface BackendStackProps extends Cdk.StackProps {
+  domainName: string;
+}
+
 export class BackendStack extends Cdk.Stack {
   private api: ApiGateway.RestApi;
   private baseLayer: Lambda.LayerVersion;
   private dynamoTable: Dynamo.Table;
 
-  constructor(app: Cdk.App, id: string, props?: Cdk.StackProps) {
+  private props: BackendStackProps;
+
+  constructor(app: Cdk.App, id: string, props: BackendStackProps) {
     super(app, id, props);
+    this.props = props;
 
     this.renderTable();
     this.renderApi();
@@ -36,6 +44,16 @@ export class BackendStack extends Cdk.Stack {
 
   private renderApi = (): void => {
     this.api = new ApiGateway.RestApi(this, 'HealthyGamerWorkshopApi', {});
+
+    const certificate = new Acm.Certificate(this, 'ApiCertificate', {
+      domainName: `api.${this.props.domainName}`,
+      validationMethod: Acm.ValidationMethod.DNS,
+    });
+
+    new ApiGateway.DomainName(this, 'HealthyGamerWorkshopApiDomainName', {
+      domainName: `api.${this.props.domainName}`,
+      certificate: certificate,
+    });
   };
 
   private renderIntegrations = (): void => {
@@ -54,7 +72,7 @@ export class BackendStack extends Cdk.Stack {
   private loadSchema = (filepath: string): ApiGateway.JsonSchema => {
     const buffer = fs.readFileSync(path.join(__dirname, '../../model', filepath));
     return JSON.parse(buffer.toString()) as ApiGateway.JsonSchema;
-  }
+  };
 
   private renderListMethod = (resource: ApiGateway.Resource): void => {
     const listFunction = new Lambda.Function(this, 'ListFunction', {
@@ -82,13 +100,13 @@ export class BackendStack extends Cdk.Stack {
     const requestModel = this.api.addModel('ListRequest', {
       contentType: 'application/json',
       modelName: 'ListRequest',
-      schema:this.loadSchema('list-request.json'),
+      schema: this.loadSchema('list-request.json'),
     });
 
     const responseModel = this.api.addModel('ListResponse', {
       contentType: 'application/json',
       modelName: 'ListResponse',
-      schema:this.loadSchema('list-response.json'),
+      schema: this.loadSchema('list-response.json'),
     });
 
     const integration = new ApiGateway.LambdaIntegration(listFunction, {
@@ -104,10 +122,10 @@ export class BackendStack extends Cdk.Stack {
         {
           statusCode: '200',
           responseModels: {
-            'application/json': responseModel
+            'application/json': responseModel,
           },
         },
-      ]
+      ],
     });
   };
 }
