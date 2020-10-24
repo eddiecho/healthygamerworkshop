@@ -53,6 +53,11 @@ export class BackendStack extends Cdk.Stack {
         domainName: `api.${this.props.domainName}`,
         certificate: certificate,
       },
+      defaultCorsPreflightOptions: {
+        allowOrigins: [ ApiGateway.Cors.ALL_ORIGINS ],
+        allowCredentials: true,
+        allowMethods: [ 'POST' ],
+      }
     });
   };
 
