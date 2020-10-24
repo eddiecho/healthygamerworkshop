@@ -6,7 +6,7 @@ from lambdas.list_handler import list_handler
 def __finalize_response(body, status_code):
     return {
         'statusCode': status_code,
-        'header': {
+        'headers': {
             'Access-Control-Allow-Origin': '*',
             'Access-Control-Allow-Credentials': True
         },
