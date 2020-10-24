@@ -26,9 +26,9 @@ def list_handler(event):
         blogs.append({
             'Title': item['Title']['S'],
             'Id': item['Id']['S'],
-            'CreationTime': int(item['Title']['N']),
-            'Summary': item['Title']['S'],
-            'Author': item['Title']['S'],
+            'CreationTime': int(item['CreationTime']['N']),
+            'Summary': item['Summary']['S'],
+            'Author': item['Author']['S'],
         })
 
     ret = {
