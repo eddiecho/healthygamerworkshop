@@ -33,13 +33,16 @@ async function listHostedZones(): Promise<Route53.ListHostedZonesResponse> {
 
   const app = new cdk.App();
 
+  const domainName = 'healthygamerworkshop.com';
   const frontendStack = new FrontendStack(app, 'HealthyGamerWorkshopFrontendStack', {
     hostedZoneId: filtered[0].Id,
     hostedZoneName: filtered[0].Name,
-    domainName: 'healthygamerworkshop.com',
+    domainName: domainName,
   });
 
-  const backendStack = new BackendStack(app, 'HealthyGamerWorkshopBackendStack');
+  const backendStack = new BackendStack(app, 'HealthyGamerWorkshopBackendStack', {
+    domainName: domainName,
+  });
 
   new CdkStack(app, 'CdkStack', {
     secretArn: githubSecret.ARN as string,
