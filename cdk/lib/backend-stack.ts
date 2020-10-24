@@ -49,7 +49,7 @@ export class BackendStack extends Cdk.Stack {
     });
 
     this.api = new ApiGateway.RestApi(this, 'HealthyGamerWorkshopApi', {
-      // CDK generation is kind of dumb, remove then readd 
+      // CDK generation is kind of dumb, remove then readd
       /* 
       domainName: {
         domainName: `api.${this.props.domainName}`,
@@ -57,10 +57,10 @@ export class BackendStack extends Cdk.Stack {
       },
       */
       defaultCorsPreflightOptions: {
-        allowOrigins: [ ApiGateway.Cors.ALL_ORIGINS ],
+        allowOrigins: ApiGateway.Cors.ALL_ORIGINS,
         allowCredentials: true,
-        allowMethods: [ 'POST' ],
-      }
+        allowMethods: ['POST'],
+      },
     });
   };
 
