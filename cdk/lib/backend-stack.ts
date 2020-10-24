@@ -43,16 +43,16 @@ export class BackendStack extends Cdk.Stack {
   };
 
   private renderApi = (): void => {
-    this.api = new ApiGateway.RestApi(this, 'HealthyGamerWorkshopApi', {});
-
     const certificate = new Acm.Certificate(this, 'ApiCertificate', {
       domainName: `api.${this.props.domainName}`,
       validationMethod: Acm.ValidationMethod.DNS,
     });
 
-    new ApiGateway.DomainName(this, 'HealthyGamerWorkshopApiDomainName', {
-      domainName: `api.${this.props.domainName}`,
-      certificate: certificate,
+    this.api = new ApiGateway.RestApi(this, 'HealthyGamerWorkshopApi', {
+      domainName: {
+        domainName: `api.${this.props.domainName}`,
+        certificate: certificate,
+      },
     });
   };
 
