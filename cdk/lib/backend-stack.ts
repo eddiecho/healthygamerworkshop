@@ -47,8 +47,9 @@ export class BackendStack extends Cdk.Stack {
   };
 
   private renderApi = (): void => {
+    const apiDomainName = `api.${this.props.domainName}`;
     const certificate = new Acm.Certificate(this, 'ApiCertificate', {
-      domainName: `api.${this.props.domainName}`,
+      domainName: apiDomainName,
       validationMethod: Acm.ValidationMethod.DNS,
     });
 
@@ -59,7 +60,7 @@ export class BackendStack extends Cdk.Stack {
 
     this.api = new ApiGateway.RestApi(this, 'HealthyGamerWorkshopApi', {
       domainName: {
-        domainName: `api.${this.props.domainName}`,
+        domainName: apiDomainName,
         certificate: certificate,
       },
       defaultCorsPreflightOptions: {
@@ -70,8 +71,11 @@ export class BackendStack extends Cdk.Stack {
     });
 
     new Route53.ARecord(this, 'ApiCustomNameRecord', {
-      target: Route53.RecordTarget.fromAlias(new Route53Targets.ApiGateway(this.api)),
+      target: Route53.RecordTarget.fromAlias(
+        new Route53Targets.ApiGatewayDomain(this.api.domainName as ApiGateway.DomainName)
+      ),
       zone: hostedZone,
+      recordName: apiDomainName,
     });
   };
 
