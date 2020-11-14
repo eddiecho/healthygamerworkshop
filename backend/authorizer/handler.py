@@ -9,7 +9,7 @@ def authorizer(event, context):
 
     try:
         id_info = id_token.verify_oauth2_token(
-            event['token'],
+            event['authorizationToken'],
             requests.Request(),
             os.environ['OAUTH_CLIENT_ID']
         )
