@@ -1,7 +1,7 @@
 import os
 
 from google.oauth2 import id_token
-from google.auth.exception import GoogleAuthError
+from google.auth.exceptions import GoogleAuthError
 from google.auth.transport import requests
 
 def authorize(event, context):
