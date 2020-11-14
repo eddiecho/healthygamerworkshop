@@ -12,7 +12,6 @@ def authorizer(event, context):
             "412905520657-kp7kfhnj9qd285lhlrh1pnnt090k0948.apps.googleusercontent.com"
         )
 
-        print(id_info)
         if id_info['iss'] != 'accounts.google.com':
             raise ValueError('Wrong issuer')
 
