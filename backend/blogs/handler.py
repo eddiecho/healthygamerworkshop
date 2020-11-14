@@ -17,9 +17,21 @@ def __finalize_response(body, status_code):
     }
 
 def list_func(event, context):
-    body = list_handler(event)
-    return __finalize_response(body, 200)
+    try:
+        body = list_handler(event)
+        return __finalize_response(body, 200)
+    except Exception as e:
+        error = {
+            "errorMessage": repr(e)
+        }
+        return __finalize_response(error, 500)
 
 def create_func(event, context):
-    body = create_handler(event)
-    return __finalize_response(body, 200)
+    try:
+        body = create_handler(event)
+        return __finalize_response(body, 200)
+    except Exception as e:
+        error = {
+            "errorMessage": repr(e)
+        }
+        return __finalize_response(error, 500)
