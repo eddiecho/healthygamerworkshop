@@ -33,7 +33,6 @@ function listBlogs(nextToken?: string) {
 function createBlog() {
   const request: Blogs.CreateRequest = {
     Title: 'My title yyoo',
-    CreationTime: Date.now(),
     Author: 'meee',
     Markdown: 'i love dr k',
   };

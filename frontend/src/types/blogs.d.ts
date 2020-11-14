@@ -9,7 +9,6 @@ export interface CreateRequest {
   Author: string;
   Title: string;
   Markdown: string;
-  CreationTime: number;
 }
 /* tslint:disable */
 /**

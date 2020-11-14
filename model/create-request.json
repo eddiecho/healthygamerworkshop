@@ -10,16 +10,12 @@
     },
     "Markdown": {
       "type": "string"
-    },
-    "CreationTime": {
-      "type": "number"
     }
   },
   "required": [
     "Author",
     "Title",
-    "Markdown",
-    "CreationTime"
+    "Markdown"
   ],
   "additionalProperties": false
 }
