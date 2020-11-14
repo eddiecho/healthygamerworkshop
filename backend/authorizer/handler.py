@@ -14,6 +14,8 @@ def authorizer(event, context):
             os.environ['OAUTH_CLIENT_ID']
         )
 
+        print(id_info)
+
         if id_info['iss'] != 'https://accounts.google.com':
             raise ValueError('Wrong issuer.')
 
