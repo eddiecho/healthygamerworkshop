@@ -1,10 +1,10 @@
 export const getCookie = (name: string): string | undefined => {
   const value = document.cookie
     .split(';')
-    .find(row => row.startsWith(`${name}=`));
+    .find(row => row.trim().startsWith(`${name}=`));
 
   if (value) {
-    return decodeURIComponent(value.split('=')[1]);
+    return decodeURIComponent(value.split(',')[0].split('=')[1]);
   }
 
   return undefined;

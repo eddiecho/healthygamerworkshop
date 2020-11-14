@@ -10,7 +10,6 @@ import * as utils from 'modules/utils';
 interface State {
   loggedIn: boolean;
   accessToken: string;
-  expirationDate: number;
 }
 
 interface StateProps {}
@@ -26,7 +25,18 @@ interface OwnProps {
 export enum LoginStorage {
   StorageKey = 'healthygamerworkshoplogin',
   User = 'user',
-  Expiry = 'expiry',
+};
+
+const getCookie = (name: string) => {
+  let value = document.cookie
+    .split(';')
+    .find(row => row.trim().startsWith(`${name}=`));
+
+  if (value) {
+    return decodeURIComponent(value.split(',')[0].split('=')[1]);
+  }
+
+  return undefined;
 };
 
 type Props = StateProps & DispatchProps & OwnProps;
@@ -37,44 +47,33 @@ export class Login extends React.Component<Props, State> {
     this.state = {
       loggedIn: false,
       accessToken: '',
-      expirationDate: 0,
     };
   }
 
   public componentDidMount() {
-    const userDataStr = utils.getCookie(LoginStorage.StorageKey);
+    const userDataStr = getCookie(LoginStorage.StorageKey);
 
     if (userDataStr) {
-      const userData = JSON.parse(userDataStr);
-      const expirationDate = userData[LoginStorage.Expiry];
+      this.setState({
+        loggedIn: true,
+        accessToken: userDataStr,
+      });
 
-      if (expirationDate > Date.now()) {
-        this.setState({
-          loggedIn: true,
-          accessToken: userData[LoginStorage.User],
-          expirationDate,
-        });
-
-        this.props.setAccessToken(userData[LoginStorage.User]);
-      } else {
-        utils.setCookie(LoginStorage.StorageKey, '');
-      }
+      this.props.setAccessToken(userDataStr);
     }
   }
 
   private loginSuccess = (response: any) => {
     if (response) {
       const googleResponse: GoogleLoginResponse = response as GoogleLoginResponse;
-      const expirationDate = googleResponse.tokenObj.expires_at;
 
       console.log(googleResponse);
       this.setState({
         loggedIn: true,
         accessToken: googleResponse.accessToken,
-        expirationDate,
       });
 
-      utils.setCookie(LoginStorage.StorageKey, googleResponse.accessToken, expirationDate);
+      utils.setCookie(LoginStorage.StorageKey, googleResponse.accessToken, googleResponse.tokenObj.expires_at);
       this.props.setAccessToken(googleResponse.accessToken);
     }
   };
@@ -83,7 +82,6 @@ export class Login extends React.Component<Props, State> {
     this.setState({
       loggedIn: false,
       accessToken: '',
-      expirationDate: 0,
     });
   };
 

@@ -67,7 +67,7 @@ export class CdkStack extends Cdk.Stack {
         },
         artifacts: {
           'base-directory': 'cdk',
-          files: ['cdk.out/**/*', 'bin/*', 'package.json'],
+          files: ['cdk.out/**/*', 'bin/*', 'package.json', '../backend/app/**/*'],
         },
       }),
       environment: {
