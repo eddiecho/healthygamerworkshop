@@ -223,7 +223,6 @@ export class BackendStack extends Cdk.Stack {
       authorizer: new ApiGateway.TokenAuthorizer(this, 'ApiGwAuthorizer', {
         handler: this.renderAuthorizerLambda(),
       }),
-      apiKeyRequired: true,
       operationName: 'CreateBlog',
       requestModels: {
         'application/json': requestModel,
