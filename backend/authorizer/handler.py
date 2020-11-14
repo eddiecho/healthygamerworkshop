@@ -4,7 +4,7 @@ from google.oauth2 import id_token
 from google.auth.exceptions import GoogleAuthError
 from google.auth.transport import requests
 
-def authorize(event, context):
+def authorizer(event, context):
     try:
         id_info = token.verify_oauth2_token(
             event['authorizationToken'],
