@@ -93,7 +93,7 @@ export class BackendStack extends Cdk.Stack {
 
   private createBaseLayer = (): void => {
     this.baseLayer = new Lambda.LayerVersion(this, 'DependenciesLayer', {
-      code: Lambda.Code.fromAsset(path.join(__dirname, '../../backend/app/layer/python/')),
+      code: Lambda.Code.fromAsset(path.join(__dirname, '../../backend/app/layer/')),
     });
   };
 
