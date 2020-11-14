@@ -21,7 +21,7 @@ def create_handler(event):
     print(event)
 
     item_id = str(uuid.uuid4())
-    creation_time = time.time()
+    creation_time = str(int(time.time()))
     body = json.loads(event.get('body', '{}'))
 
     kwargs = {
