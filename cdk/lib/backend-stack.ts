@@ -13,6 +13,7 @@ interface BackendStackProps extends Cdk.StackProps {
   domainName: string;
   hostedZoneId: string;
   hostedZoneName: string;
+  googleClientId: string;
 }
 
 export class BackendStack extends Cdk.Stack {
@@ -26,11 +27,19 @@ export class BackendStack extends Cdk.Stack {
     super(app, id, props);
     this.props = props;
 
+    this.createBaseLayer();
+
     this.renderTable();
     this.renderApi();
 
     this.renderIntegrations();
-  }
+  };
+
+  private createBaseLayer = (): void => {
+    this.baseLayer = new Lambda.LayerVersion(this, 'DependenciesLayer', {
+      code: Lambda.Code.fromAsset(path.join(__dirname, '../../backend/app/layer/')),
+    });
+  };
 
   private renderTable = (): void => {
     this.dynamoTable = new Dynamo.Table(this, 'BlogsTable', {
@@ -81,15 +90,20 @@ export class BackendStack extends Cdk.Stack {
 
   private renderIntegrations = (): void => {
     const root = this.api.root.addResource('blog');
+
     const list = root.addResource('list');
     this.renderListMethod(list);
+
+    const create = root.addResource('create');
+    this.renderCreateMethod(create);
   };
 
   private createAssetCode = (): Lambda.Code => {
-    this.baseLayer = new Lambda.LayerVersion(this, 'DependenciesLayer', {
-      code: Lambda.Code.fromAsset(path.join(__dirname, '../../backend/app/layer/')),
-    });
     return Lambda.Code.fromAsset(path.join(__dirname, '../../backend/blogs'));
+  };
+
+  private createAuthorizerCode = (): Lambda.Code => {
+    return Lambda.Code.fromAsset(path.join(__dirname, '../../backend/authorizer'));
   };
 
   private loadSchema = (filepath: string): ApiGateway.JsonSchema => {
@@ -151,4 +165,88 @@ export class BackendStack extends Cdk.Stack {
       ],
     });
   };
+
+  private renderAuthorizerLambda = (): Lambda.Function => {
+    return new Lambda.Function(this, 'ApiAuthorizer', {
+      runtime: Lambda.Runtime.PYTHON_3_8,
+      code: this.createAuthorizerCode(),
+      handler: 'handler.authorize',
+      layers: [this.baseLayer],
+      memorySize: 256,
+    });
+  };
+
+  private renderCreateMethod = (resource: ApiGateway.Resource): void => {
+    const createFunction = new Lambda.Function(this, 'CreateFunction', {
+      runtime: Lambda.Runtime.PYTHON_3_8,
+      code: this.createAssetCode(),
+      handler: 'handler.create_func',
+      layers: [this.baseLayer],
+      memorySize: 1024,
+      environment: {
+        TABLE_NAME: this.dynamoTable.tableName,
+      },
+    });
+    const createFunctionExecutionPolicy = new Iam.PolicyStatement({
+      actions: ['dynamodb:PutItem'],
+      effect: Iam.Effect.ALLOW,
+      resources: [this.dynamoTable.tableArn],
+    });
+    createFunction.addToRolePolicy(createFunctionExecutionPolicy);
+    createFunction.addPermission('APIGWInvoke', {
+      principal: new Iam.ServicePrincipal('apigateway.amazonaws.com'),
+      action: 'lambda:InvokeFunction',
+      sourceArn: this.api.arnForExecuteApi(),
+    });
+
+    const requestModel = this.api.addModel('CreateRequest', {
+      contentType: 'application/json',
+      modelName: 'CreateRequest',
+      schema: this.loadSchema('create-request.json'),
+    });
+
+    const responseModel = this.api.addModel('CreateResponse', {
+      contentType: 'application/json',
+      modelName: 'CreateResponse',
+      schema: this.loadSchema('create-response.json'),
+    });
+
+    const integration = new ApiGateway.LambdaIntegration(createFunction, {
+      allowTestInvoke: true,
+      proxy: true,
+    });
+    const method = resource.addMethod('POST', integration, {
+      authorizationType: ApiGateway.AuthorizationType.CUSTOM,
+      authorizer: new ApiGateway.TokenAuthorizer(this, 'ApiGwAuthorizer', {
+        handler: this.renderAuthorizerLambda(),
+      }),
+      apiKeyRequired: true,
+      operationName: 'CreateBlog',
+      requestModels: {
+        'application/json': requestModel,
+      },
+      methodResponses: [
+        {
+          statusCode: '200',
+          responseModels: {
+            'application/json': responseModel,
+          },
+        },
+      ],
+    });
+
+    const createInvokerRole = new Iam.Role(this, 'CreateInvokerRole', {
+      assumedBy: new Iam.WebIdentityPrincipal('accounts.google.com', {
+        StringEquals: {
+          'accounts.google.com:aud': this.props.googleClientId,
+        }
+      })
+    });
+    createInvokerRole.addToPolicy(new Iam.PolicyStatement({
+      resources: [method.methodArn],
+      effect: Iam.Effect.ALLOW,
+      actions: [ 'execute-api:Invoke' ]
+    }));
+  };
+
 }
