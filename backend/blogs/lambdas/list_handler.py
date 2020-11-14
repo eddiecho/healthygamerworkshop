@@ -14,7 +14,7 @@ def list_handler(event):
         'Limit': 4
     }
 
-    body = json.loads(event['body'])
+    body = json.loads(event.get('body', '{}'))
     if 'NextToken' in body:
         kwargs['ExclusiveStartKey'] = {
             "Id": {

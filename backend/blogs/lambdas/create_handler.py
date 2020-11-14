@@ -22,7 +22,7 @@ def create_handler(event):
 
     item_id = str(uuid.uuid4())
     creation_time = time.time()
-    body = json.loads(event['body'])
+    body = json.loads(event.get('body', '{}'))
 
     kwargs = {
         'TableName': os.environ['TABLE_NAME'],
