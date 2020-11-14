@@ -21,15 +21,16 @@ def create_handler(event):
 
     item_id = str(uuid.uuid4())
     creation_time = time.time()
+    body = event['body']
 
     kwargs = {
         'TableName': os.environ['TABLE_NAME'],
         'Item': {
-            'Title': {'S': event['Title']},
+            'Title': {'S': body['Title']},
             'Id': {'S': item_id},
             'CreationTime': {'N': creation_time},
-            'Summary': {'S': event['Markdown'][:40]},
-            'Author': {'S': event['Author']}
+            'Summary': {'S': body['Markdown'][:40]},
+            'Author': {'S': body['Author']}
         }
     }
 

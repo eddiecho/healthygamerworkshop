@@ -13,10 +13,11 @@ def list_handler(event):
         'Limit': 4
     }
 
-    if 'NextToken' in event:
+    body = event['body']
+    if 'NextToken' in body:
         kwargs['ExclusiveStartKey'] = {
             "Id": {
-                "S": event["NextToken"]
+                "S": body["NextToken"]
             }
         }
 
