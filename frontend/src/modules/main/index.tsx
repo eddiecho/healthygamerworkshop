@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { connect } from 'react-redux';
-import { Dispatch, bindActionCreators } from 'redux';
+import { bindActionCreators } from 'redux';
 
 import { Store } from 'store';
 import { AsyncThunkDispatch, bindAsyncActionCreator } from 'store/async-helper';
@@ -14,8 +14,8 @@ interface StateProps {
 
 interface DispatchProps {
   propAction: typeof Actions.propsActions;
-  listBlogs: (nextToken?: string) => Promise<any>;
-  createBlog: (title: string, author: string, markdown: string) => Promise<any>;
+  listBlogs: (nextToken?: string) => Promise<Blogs.ListResponse | undefined>;
+  createBlog: (title: string, author: string, markdown: string) => Promise<Blogs.CreateResponse | undefined>;
 }
 
 interface OwnProps {}

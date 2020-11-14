@@ -59,6 +59,8 @@ export function asyncActionCreator<T>(apiName: string, promise: Promise<T>, opti
         type: fetchSuccessType(apiName),
         payload: response,
       });
+
+      return response;
     } catch (err) {
       console.log(err);
 

@@ -25,9 +25,9 @@ function listBlogs(nextToken?: string) {
         headers: {
           'Content-Type': 'application/json',
         }
-      }).then(response => response.json()),
+      }).then(response => <unknown>response.json() as Blogs.ListResponse),
       {}
-  )
+  );
 }
 
 function createBlog(title: string, author: string, markdown: string) {
@@ -51,7 +51,7 @@ function createBlog(title: string, author: string, markdown: string) {
       body: JSON.stringify(request),
       mode: 'cors',
       headers,
-    }).then(response => response.json()),
+    }).then(response => <unknown>response.json() as Blogs.CreateResponse),
     {}
   );
 }

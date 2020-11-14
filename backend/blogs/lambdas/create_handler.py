@@ -15,7 +15,7 @@ def create_handler(event):
         'TableName': os.environ['TABLE_NAME'],
         'Item': {
             'Title': {'S': body['Title']},
-            'CreationTime': {'N': creation_time}
+            'CreationTime': {'N': creation_time},
             'Id': {'S': blog_id},
             'Author': {'S': body['Author']},
             'Summary': {'S': body['Markdown']}
