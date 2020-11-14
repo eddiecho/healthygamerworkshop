@@ -6,12 +6,13 @@ from google.auth.transport import requests
 
 def authorizer(event, context):
     try:
-        id_info = token.verify_oauth2_token(
+        id_info = id_token.verify_oauth2_token(
             event['authorizationToken'],
             requests.Request(),
             "412905520657-kp7kfhnj9qd285lhlrh1pnnt090k0948.apps.googleusercontent.com"
         )
 
+        print(id_info)
         if id_info['iss'] != 'accounts.google.com':
             raise ValueError('Wrong issuer')
 
@@ -34,3 +35,4 @@ def authorizer(event, context):
         raise Exception('Unauthorized')
     except Exception:
         raise Exception('Unauthorized')
+
