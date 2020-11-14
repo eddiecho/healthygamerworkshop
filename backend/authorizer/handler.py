@@ -5,6 +5,8 @@ from google.auth.exceptions import GoogleAuthError
 from google.auth.transport import requests
 
 def authorizer(event, context):
+    print(event)
+
     try:
         id_info = id_token.verify_oauth2_token(
             event['token'],
