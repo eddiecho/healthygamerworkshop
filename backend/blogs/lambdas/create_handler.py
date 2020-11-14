@@ -1,4 +1,5 @@
 import boto3
+import json
 import os
 import uuid
 import time
@@ -21,7 +22,7 @@ def create_handler(event):
 
     item_id = str(uuid.uuid4())
     creation_time = time.time()
-    body = event['body']
+    body = json.loads(event['body'])
 
     kwargs = {
         'TableName': os.environ['TABLE_NAME'],

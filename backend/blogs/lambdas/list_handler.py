@@ -1,4 +1,5 @@
 import boto3
+import json
 import os
 
 def list_handler(event):
@@ -13,7 +14,7 @@ def list_handler(event):
         'Limit': 4
     }
 
-    body = event['body']
+    body = json.loads(event['body'])
     if 'NextToken' in body:
         kwargs['ExclusiveStartKey'] = {
             "Id": {
