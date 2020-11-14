@@ -6,7 +6,7 @@ import time
 def create_handler(event):
     ddb = boto3.client('dynamodb')
 
-    item_id = uuid.uuid4()
+    item_id = str(uuid.uuid4())
     creation_time = time.time()
 
     kwargs = {
