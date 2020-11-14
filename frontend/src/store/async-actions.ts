@@ -1,9 +1,14 @@
-import * as Blogs from 'types/blogs';
+import { LoginCookie } from 'modules/login';
+import * as utils from 'modules/utils';
 import { asyncActionCreator } from 'store/async-helper';
+import * as Blogs from 'types/blogs';
 
 export enum BlogActions {
   listBlogs = 'listBlogs',
+  createBlog = 'createBlog',
 }
+
+const apiDomain = 'https://api.healthygamerworkshop.com/blog/';
 
 function listBlogs(nextToken?: string) {
   const request: Blogs.ListRequest = {};
@@ -13,7 +18,7 @@ function listBlogs(nextToken?: string) {
 
   return asyncActionCreator(
     BlogActions.listBlogs,
-    fetch('https://api.healthygamerworkshop.com/blog/list', {
+    fetch(`${apiDomain}list`, {
         method: 'POST',
         body: JSON.stringify(request),
         mode: 'cors',
@@ -25,6 +30,34 @@ function listBlogs(nextToken?: string) {
   )
 }
 
+function createBlog(title: string, author: string, markdown: string) {
+  const request: Blogs.CreateRequest = {
+    Title: title,
+    Author: author,
+    Markdown: markdown,
+  };
+
+  const headers = new Headers();
+  headers.append('Content-Type', 'application/json');
+  const clientToken = utils.getCookie(LoginCookie.StorageKey);
+  if (clientToken) {
+    headers.append('Authorization', clientToken);
+  }
+
+  return asyncActionCreator(
+    BlogActions.createBlog,
+    fetch(`${apiDomain}create`, {
+      method: 'POST',
+      body: JSON.stringify(request),
+      mode: 'cors',
+      headers,
+    }).then(response => response.json()),
+    {}
+  );
+}
+
 export default {
   listBlogs,
+  createBlog,
 };
+

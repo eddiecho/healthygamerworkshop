@@ -5,6 +5,7 @@ import { Dispatch, bindActionCreators } from 'redux';
 import { Store } from 'store';
 import { AsyncThunkDispatch, bindAsyncActionCreator } from 'store/async-helper';
 import BlogActions from 'store/async-actions';
+import * as Blogs from 'types/blogs';
 import * as Actions from './actions';
 
 interface StateProps {
@@ -14,6 +15,7 @@ interface StateProps {
 interface DispatchProps {
   propAction: typeof Actions.propsActions;
   listBlogs: (nextToken?: string) => Promise<any>;
+  createBlog: (title: string, author: string, markdown: string) => Promise<any>;
 }
 
 interface OwnProps {}
@@ -46,13 +48,17 @@ class Main extends React.Component<Props, State> {
 
   private incrementCount = () => {
     this.setState({...this.state, count: this.state.count + 1});
-  }
+  };
 
   private setCount = () => {
     if (this.props.propAction) {
       this.props.propAction(this.state.count);
     }
-  }
+  };
+
+  private createBlog = () => {
+    this.props.createBlog('my title yo', 'meee', 'i love dr k');
+  };
 
   render() {
     return (
@@ -60,6 +66,8 @@ class Main extends React.Component<Props, State> {
         <p>{this.props.reduxProps}</p>
         <button onClick={this.setCount}>HITMEGACHIBASS</button>
         <button onClick={this.incrementCount}>{this.state.count}</button>
+        <br />
+        <button onClick={this.createBlog}>{"Please don't press me"}</button>
       </React.Fragment>
     );
   }
@@ -75,6 +83,7 @@ const mapDispatchToProps = (dispatch: AsyncThunkDispatch): DispatchProps => {
   return {
     ...bindActionCreators({ propAction: Actions.propsActions }, dispatch),
     listBlogs: bindAsyncActionCreator(BlogActions.listBlogs, dispatch),
+    createBlog: bindAsyncActionCreator(BlogActions.createBlog, dispatch),
   }
 }
 

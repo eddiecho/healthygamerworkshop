@@ -13,6 +13,7 @@ interface BackendStackProps extends Cdk.StackProps {
   domainName: string;
   hostedZoneId: string;
   hostedZoneName: string;
+  googleClientId: string;
 }
 
 export class BackendStack extends Cdk.Stack {
@@ -25,6 +26,8 @@ export class BackendStack extends Cdk.Stack {
   constructor(app: Cdk.App, id: string, props: BackendStackProps) {
     super(app, id, props);
     this.props = props;
+
+    this.createBaseLayer();
 
     this.renderTable();
     this.renderApi();
@@ -83,18 +86,38 @@ export class BackendStack extends Cdk.Stack {
     const root = this.api.root.addResource('blog');
     const list = root.addResource('list');
     this.renderListMethod(list);
+
+    const create = root.addResource('create');
+    this.renderCreateMethod(create);
+  };
+
+  private createBaseLayer = (): void => {
+    this.baseLayer = new Lambda.LayerVersion(this, 'DependenciesLayer', {
+      code: Lambda.Code.fromAsset(path.join(__dirname, '../../backend/app/layer/python/')),
+    });
   };
 
   private createAssetCode = (): Lambda.Code => {
-    this.baseLayer = new Lambda.LayerVersion(this, 'DependenciesLayer', {
-      code: Lambda.Code.fromAsset(path.join(__dirname, '../../backend/app/layer/')),
-    });
     return Lambda.Code.fromAsset(path.join(__dirname, '../../backend/blogs'));
   };
 
   private loadSchema = (filepath: string): ApiGateway.JsonSchema => {
     const buffer = fs.readFileSync(path.join(__dirname, '../../model', filepath));
     return JSON.parse(buffer.toString()) as ApiGateway.JsonSchema;
+  };
+
+  private renderAuthorizer = (): ApiGateway.TokenAuthorizer => {
+    const authFunction = new Lambda.Function(this, 'AuthorizerLambda', {
+      runtime: Lambda.Runtime.PYTHON_3_8,
+      code: Lambda.Code.fromAsset(path.join(__dirname, '../../backend/authorizer')),
+      handler: 'handler.authorizer',
+      layers: [this.baseLayer],
+      memorySize: 256,
+    });
+
+    return new ApiGateway.TokenAuthorizer(this, 'ApiAuthorizer', {
+      handler: authFunction,
+    });
   };
 
   private renderListMethod = (resource: ApiGateway.Resource): void => {
@@ -138,6 +161,63 @@ export class BackendStack extends Cdk.Stack {
     });
     resource.addMethod('POST', integration, {
       operationName: 'ListBlogs',
+      requestModels: {
+        'application/json': requestModel,
+      },
+      methodResponses: [
+        {
+          statusCode: '200',
+          responseModels: {
+            'application/json': responseModel,
+          },
+        },
+      ],
+    });
+  };
+
+  private renderCreateMethod = (resource: ApiGateway.Resource): void => {
+    const createFunction = new Lambda.Function(this, 'CreateFunction', {
+      runtime: Lambda.Runtime.PYTHON_3_8,
+      code: this.createAssetCode(),
+      handler: 'handler.create_func',
+      layers: [this.baseLayer],
+      memorySize: 256,
+      environment: {
+        TABLE_NAME: this.dynamoTable.tableName,
+      },
+    });
+    const createFunctionExecutionPolicy = new Iam.PolicyStatement({
+      actions: ['dynamodb:PutItem'],
+      effect: Iam.Effect.ALLOW,
+      resources: [this.dynamoTable.tableArn],
+    });
+    createFunction.addToRolePolicy(createFunctionExecutionPolicy);
+    createFunction.addPermission('APIGWInvoke', {
+      principal: new Iam.ServicePrincipal('apigateway.amazonaws.com'),
+      action: 'lambda:InvokeFunction',
+      sourceArn: this.api.arnForExecuteApi(),
+    });
+
+    const requestModel = this.api.addModel('CreateRequest', {
+      contentType: 'application/json',
+      modelName: 'CreateRequest',
+      schema: this.loadSchema('create-request.json'),
+    });
+
+    const responseModel = this.api.addModel('CreateResponse', {
+      contentType: 'application/json',
+      modelName: 'CreateResponse',
+      schema: this.loadSchema('create-response.json'),
+    });
+
+    const integration = new ApiGateway.LambdaIntegration(createFunction, {
+      allowTestInvoke: true,
+      proxy: true,
+    });
+    resource.addMethod('POST', integration, {
+      authorizationType: ApiGateway.AuthorizationType.CUSTOM,
+      authorizer: this.renderAuthorizer(),
+      operationName: 'CreateBlog',
       requestModels: {
         'application/json': requestModel,
       },

@@ -4,7 +4,7 @@ set -xe
 
 # install phase
 pushd backend
-pip3 --no-cache install -r requirements.txt --no-deps --target app/layer/
+pip3 --no-cache install -r requirements.txt --target app/layer/python/
 popd
 
 pushd cdk
