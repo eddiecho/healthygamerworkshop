@@ -2,6 +2,7 @@ import json
 import logging
 
 from lambdas.list_handler import list_handler
+from lambdas.create_handler import create_handler
 
 def __finalize_response(body, status_code):
     return {
@@ -17,4 +18,8 @@ def __finalize_response(body, status_code):
 
 def list_func(event, context):
     body = list_handler(event)
+    return __finalize_response(body, 200)
+
+def create_func(event, context):
+    body = create_handler(event)
     return __finalize_response(body, 200)

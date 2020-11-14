@@ -14,6 +14,10 @@ fs.readdir(modelDir, function(err, files) {
 
   for (const file of files) {
     console.log(file);
-    jsts.compileFromFile(path.join(modelDir, file)).then(ts => fs.appendFileSync(outputDir, ts));
+    jsts.compileFromFile(path.join(modelDir, file)).then(ts => {
+      if (ts) {
+        fs.appendFileSync(outputDir, ts);
+      }
+    });
   }
 })

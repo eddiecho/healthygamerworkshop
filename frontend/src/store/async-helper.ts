@@ -99,4 +99,20 @@ export function asyncReducerCreator<T>(apiName: string) {
   }
 }
 
-export type AsyncReducerType<T> = { [N in keyof T]?: AsyncState<any> };
+export type AsyncReducerType<T> = { [N in keyof T]: AsyncState<any> };
+
+export const unwrapAsyncState = <T>(state: AsyncState<T>): T | undefined => {
+  if (state.status === AsyncActionStatus.Success) {
+    return state.payload as T;
+  }
+
+  return undefined;
+};
+
+export const unwrapAsyncError = (state: AsyncState<any>): string | undefined => {
+  if (state.status === AsyncActionStatus.Failure) {
+    return state.error as string;
+  }
+
+  return undefined;
+}

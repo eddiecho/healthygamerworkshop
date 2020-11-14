@@ -1,13 +1,19 @@
 import React from 'react';
-import logo from './logo.svg';
+
 import './App.css';
 
-import {Header} from 'modules/header';
+import { Header } from 'modules/header';
+import Login from 'modules/login';
 import MainComponent from 'modules/main';
 
-function App() {
+interface Props {
+  clientId: string
+}
+
+function App(props: Props) {
   return (
     <div className="App">
+      <Login clientId={props.clientId} />
       <Header count={0} />
       <MainComponent />
     </div>

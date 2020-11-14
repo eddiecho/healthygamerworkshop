@@ -45,6 +45,7 @@ async function listHostedZones(): Promise<Route53.ListHostedZonesResponse> {
     domainName: domainName,
     hostedZoneId: hostedZone.Id,
     hostedZoneName: hostedZone.Name,
+    googleClientId: '412905520657-kp7kfhnj9qd285lhlrh1pnnt090k0948.apps.googleusercontent.com',
   });
 
   new CdkStack(app, 'CdkStack', {

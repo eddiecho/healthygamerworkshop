@@ -11,10 +11,12 @@ import { configureStore } from 'store';
 
 const store = configureStore;
 
+const googleClientId = '412905520657-kp7kfhnj9qd285lhlrh1pnnt090k0948.apps.googleusercontent.com';
+
 ReactDOM.render(
   <React.StrictMode>
     <Provider store={store}>
-      <App />
+      <App clientId={googleClientId} />
     </Provider>
   </React.StrictMode>,
   document.getElementById('root')

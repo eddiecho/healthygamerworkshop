@@ -2,6 +2,7 @@ import { applyMiddleware, combineReducers, compose, createStore } from 'redux';
 import Thunk from 'redux-thunk';
 
 import { MainReducer, mainReducer } from 'modules/main/reducers';
+import { LoginState, loginReducer } from 'modules/login/reducers';
 import blog, { BlogReducers } from 'store/async-reducers';
 
 const isDevelopment = process.env.NODE_ENV === 'development';
@@ -17,12 +18,14 @@ if (isDevelopment) {
 export interface Store {
   main: MainReducer;
   blog: BlogReducers;
+  login: LoginState;
 }
 
 export const configureStore = createStore<Store, any, {}, {}>(
   combineReducers({
+    login: loginReducer,
     main: mainReducer,
-    blog
+    blog,
   }),
   enhancedCompose(applyMiddleware(Thunk))
 )

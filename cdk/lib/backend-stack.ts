@@ -33,7 +33,7 @@ export class BackendStack extends Cdk.Stack {
     this.renderApi();
 
     this.renderIntegrations();
-  };
+  }
 
   private createBaseLayer = (): void => {
     this.baseLayer = new Lambda.LayerVersion(this, 'DependenciesLayer', {
@@ -170,9 +170,12 @@ export class BackendStack extends Cdk.Stack {
     return new Lambda.Function(this, 'ApiAuthorizer', {
       runtime: Lambda.Runtime.PYTHON_3_8,
       code: this.createAuthorizerCode(),
-      handler: 'handler.authorize',
+      handler: 'handler.authorizer',
       layers: [this.baseLayer],
       memorySize: 256,
+      environment: {
+        OAUTH_CLIENT_ID: this.props.googleClientId,
+      },
     });
   };
 
@@ -239,14 +242,15 @@ export class BackendStack extends Cdk.Stack {
       assumedBy: new Iam.WebIdentityPrincipal('accounts.google.com', {
         StringEquals: {
           'accounts.google.com:aud': this.props.googleClientId,
-        }
-      })
+        },
+      }),
     });
-    createInvokerRole.addToPolicy(new Iam.PolicyStatement({
-      resources: [method.methodArn],
-      effect: Iam.Effect.ALLOW,
-      actions: [ 'execute-api:Invoke' ]
-    }));
+    createInvokerRole.addToPolicy(
+      new Iam.PolicyStatement({
+        resources: [method.methodArn],
+        effect: Iam.Effect.ALLOW,
+        actions: ['execute-api:Invoke'],
+      })
+    );
   };
-
 }
