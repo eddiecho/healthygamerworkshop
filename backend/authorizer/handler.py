@@ -16,7 +16,7 @@ def authorizer(event, context):
 
         print(id_info)
 
-        if id_info['iss'] != 'https://accounts.google.com':
+        if id_info['iss'] != 'accounts.google.com':
             raise ValueError('Wrong issuer.')
 
         userid = id_info['sub']

@@ -28,12 +28,13 @@ export enum LoginStorage {
 };
 
 const getCookie = (name: string) => {
-  let value = document.cookie
+  const value = document.cookie
     .split(';')
     .find(row => row.trim().startsWith(`${name}=`));
 
   if (value) {
-    return decodeURIComponent(value.split(',')[0].split('=')[1]);
+    const ret = decodeURIComponent(value.split(',')[0].split('=')[1]);
+    return ret === 'undefined' ? undefined : ret;
   }
 
   return undefined;
@@ -70,11 +71,11 @@ export class Login extends React.Component<Props, State> {
       console.log(googleResponse);
       this.setState({
         loggedIn: true,
-        accessToken: googleResponse.accessToken,
+        accessToken: googleResponse.tokenId,
       });
 
-      utils.setCookie(LoginStorage.StorageKey, googleResponse.accessToken, googleResponse.tokenObj.expires_at);
-      this.props.setAccessToken(googleResponse.accessToken);
+      utils.setCookie(LoginStorage.StorageKey, googleResponse.tokenId, googleResponse.tokenObj.expires_at);
+      this.props.setAccessToken(googleResponse.tokenId);
     }
   };
 
